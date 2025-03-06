@@ -42,7 +42,7 @@
       .thumbnail {
         width: 100%;
         height: 180px;
-        object-fit: cover;
+        object-fit: contain;
         cursor: pointer;
       }
 
@@ -109,9 +109,9 @@
         card.className = "channel-card";
         card.dataset.index = channel.index;
 
-        const nameTag = document.createElement("div");
-        nameTag.className = "channel-name";
-        nameTag.textContent = channel.name;
+        // const nameTag = document.createElement("div");
+        // nameTag.className = "channel-name";
+        // nameTag.textContent = channel.name;
 
         const img = document.createElement("img");
         img.className = "thumbnail";
@@ -129,7 +129,7 @@
         img.onload = function () {
           const sizeTag = document.createElement("div");
           sizeTag.className = "size-info";
-          sizeTag.textContent = `${img.naturalWidth * 5} x ${
+          sizeTag.textContent = `${channel.name} ${img.naturalWidth * 5} x ${
             img.naturalHeight * 5
           }`;
           card.appendChild(sizeTag);
@@ -184,10 +184,14 @@
 
         closeBtn.addEventListener("click", (e) => {
           e.stopPropagation();
+          console.log(card.dataset.index);
+          iptvDatas = iptvDatas.filter((c) => c.index != card.dataset.index);
           card.remove();
+          console.info(iptvDatas);
+          
         });
 
-        card.append(nameTag, img, closeBtn);
+        card.append(img, closeBtn);
         return card;
       }
 
@@ -209,12 +213,15 @@
         }, 300);
       });
 
+      let iptvDatas = [];
       // 加载JSON数据
       fetch("urls.json")
         .then((response) => response.json())
         .then((data) => {
           const container = document.querySelector(".grid-container");
-          data.forEach((channel) => {
+          iptvDatas = data.filter((c) => c.ok);
+
+          iptvDatas.forEach((channel) => {
             container.appendChild(createCard(channel));
           });
         })
