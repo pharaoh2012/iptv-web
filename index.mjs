@@ -16,8 +16,8 @@ async function main() {
         });
         fs.writeFileSync("./docs/urls.json",JSON.stringify(urls));
         console.log(urls);
-        const cmds = urls.map((item)=>{
-            return `ffmpeg -timeout 10000000 -headers "timeout=10" -i "${item.url}" -vf "select=eq(n\\,0)" -q:v 2 -y "docs/img/${item.index}.jpg"\nffmpeg -i "docs/img/${item.index}.jpg" -vf "scale=iw*0.2:ih*0.2" -y "docs/img/${item.index}_thumbnail.jpg"`
+        const cmds = urls.map((item,index)=>{
+            return `echo 🎞🎞[${index+1}/${urls.length}] ${item.name} ${item.url}\nffmpeg -timeout 10000000 -headers "timeout=10" -i "${item.url}" -vf "select=eq(n\\,0)" -q:v 2 -y "docs/img/${item.index}.jpg"\nffmpeg -i "docs/img/${item.index}.jpg" -vf "scale=iw*0.2:ih*0.2" -y "docs/img/${item.index}_thumbnail.jpg"`
         })
         fs.writeFileSync("index.sh",cmds.join("\n"));
     });
