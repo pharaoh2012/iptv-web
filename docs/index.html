@@ -113,22 +113,6 @@
           this.dataset.original = "";
         };
 
-        /* 修改悬停交互逻辑 */
-        const overlay = document.getElementById("previewOverlay");
-
-        overlay.addEventListener("click", (e) => {
-          console.info(e.target.tagName);
-          if (e.target.tagName === "IMG") {
-            return;
-          }
-
-          overlay.style.opacity = 0;
-          setTimeout(() => {
-            overlay.style.display = "none";
-            currentPreview = null;
-          }, 300);
-        });
-
         let currentPreview = null;
         let currentIndex = -1;
 
@@ -149,38 +133,61 @@
 
         // 更新鼠标事件处理
         card.addEventListener("click", (e) => {
-          if (
-            img.dataset.original &&
-            (currentIndex !== channel.index || !currentPreview)
-          ) {
-            if (
-              !e.relatedTarget ||
-              !e.relatedTarget.closest(".preview-overlay")
-            ) {
-              currentIndex = channel.index;
-              currentPreview = createPreview(img.dataset.original);
-              overlay.innerHTML = "";
-              overlay.appendChild(currentPreview);
-            }
-          }
-        });
-
-        card.addEventListener("mouseleave", () => {
-          if (currentPreview) {
-            // overlay.style.opacity = 0;
-            // setTimeout(() => {
-            //   overlay.style.display = 'none';
-            //   currentPreview = null;
-            // }, 300);
+          if (img.dataset.original) {
+            currentIndex = channel.index;
+            currentPreview = createPreview(img.dataset.original);
+            overlay.innerHTML = "";
+            overlay.appendChild(currentPreview);
           }
         });
 
         // 悬停切换大图
         let originalImg = "";
 
-        card.append(nameTag, img);
+        /* 添加关闭按钮 */
+        const closeBtn = document.createElement("div");
+        closeBtn.style.position = "absolute";
+        closeBtn.style.top = "10px";
+        closeBtn.style.right = "10px";
+        closeBtn.style.width = "24px";
+        closeBtn.style.height = "24px";
+        closeBtn.style.background = "rgba(255, 255, 255, 0.9)";
+        closeBtn.style.borderRadius = "50%";
+        closeBtn.style.cursor = "pointer";
+        closeBtn.style.display = "flex";
+        closeBtn.style.alignItems = "center";
+        closeBtn.style.justifyContent = "center";
+        closeBtn.style.zIndex = "2";
+        closeBtn.innerHTML = "×";
+
+        closeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          card.remove();
+        });
+
+        card.append(nameTag, img, closeBtn);
         return card;
       }
+
+      /* 修改悬停交互逻辑 */
+      const overlay = document.getElementById("previewOverlay");
+
+      console.info("create overlay");
+
+      overlay.addEventListener("click", (e) => {
+        console.info(e.target.tagName);
+        if (e.target.tagName === "IMG") {
+          console.info(e.target.src);
+          open(e.target.src);
+          return;
+        }
+
+        overlay.style.opacity = 0;
+        setTimeout(() => {
+          overlay.style.display = "none";
+          currentPreview = null;
+        }, 300);
+      });
 
       // 加载JSON数据
       fetch("urls.json")
