@@ -56,8 +56,11 @@ async function main() {
         console.log(`🎞🎞[${i + 1}/${urls.length}] ${item.name} ${item.url}`);
         console.log(`ffmpeg -i "${item.url}" -vf "select='eq(pict_type,I)',setpts=PTS-STARTPTS" -vsync vfr -q:v 2 -frames:v 1 -y "docs/img/${item.index}.jpg"`);
         await execAsync(`ffmpeg -i "${item.url}" -vf "select='eq(pict_type,I)',setpts=PTS-STARTPTS" -vsync vfr -q:v 2 -frames:v 1 -y "docs/img/${item.index}.jpg"`);
-        await execAsync(`ffmpeg -i "docs/img/${item.index}.jpg" -vf "scale=iw*0.2:ih*0.2" -y "docs/img/${item.index}_thumbnail.jpg"`);
         urls[i].ok = fs.existsSync(`docs/img/${item.index}.jpg`)
+        if (urls[i].ok) { // 生成缩略图
+            await execAsync(`ffmpeg -i "docs/img/${item.index}.jpg" -vf "scale=iw*0.2:ih*0.2" -y "docs/img/${item.index}_thumbnail.jpg"`);
+        }
+
     }
 
     fs.writeFileSync("./docs/urls.json", JSON.stringify(urls));
