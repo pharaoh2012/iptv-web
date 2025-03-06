@@ -1,0 +1,31 @@
+name: Run Node Script
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Run script
+      run: |
+        node index.mjs
+        chmod +x index.sh
+        ./index.sh
+        rm ./index.sh
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add .
+        git commit -am 'Auto-commit generated files' || true
+        git push
