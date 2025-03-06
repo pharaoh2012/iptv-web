@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 // sequentialExec.mjs
 import { exec } from 'child_process';
 
@@ -20,7 +21,18 @@ function execAsync(command) {
     });
 }
 async function main() {
+    // 先创建目录确保存在
     fs.mkdirSync("./docs/img", { recursive: true });
+    
+    // 删除现有JPG文件
+    const imgDir = "./docs/img";
+    const files = fs.readdirSync(imgDir);
+    const jpgFiles = files.filter(file => file.endsWith('.jpg'));
+    jpgFiles.forEach(file => {
+        fs.unlinkSync(path.join(imgDir, file));
+    });
+    console.log(`已删除 ${jpgFiles.length} 个JPG文件`);
+    
     const res = await fetch("https://getproxy.deno.dev/?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fpharaoh2012%2Fiptv-api%2Foutput%2Fuser_result.txt").then(res => res.text());
 
     let urls = res.split("\n").filter(item => {
