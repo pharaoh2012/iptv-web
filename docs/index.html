@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV频道列表</title>
+    <style>
+        :root {
+            --grid-gap: 15px;
+            --card-width: 300px;
+        }
+
+        body {
+            padding: 20px;
+            background: #f0f2f5;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+            gap: var(--grid-gap);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .channel-card {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            background: white;
+        }
+
+        .channel-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .channel-name {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+                    /* 新增悬浮层样式 */
+                    .preview-overlay {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background: rgba(0,0,0,0.8);
+              display: none;
+              justify-content: center;
+              align-items: center;
+              z-index: 999;
+              opacity: 0;
+              transition: opacity 0.3s ease;
+            }
+            
+            .preview-image {
+              max-width: 80%;
+              max-height: 80%;
+              box-shadow: 0 0 20px rgba(0,0,0,0.3);
+              transform: scale(0.95);
+              transition: transform 0.3s ease;
+            }
+    </style>
+</head>
+<body>
+  <div class="preview-overlay" id="previewOverlay"></div>
+  <div class="grid-container"></div>
+
+    <script>
+        function createCard(channel) {
+            const card = document.createElement('div');
+            card.className = 'channel-card';
+
+            const nameTag = document.createElement('div');
+            nameTag.className = 'channel-name';
+            nameTag.textContent = channel.name;
+
+            const img = document.createElement('img');
+            img.className = 'thumbnail';
+            img.loading = 'lazy';
+            img.src = `img/${channel.index}_thumbnail.jpg`;
+            img.dataset.original = `img/${channel.index}.jpg`;
+            
+
+            
+            /* 处理图片加载错误 */
+            img.onerror = function() {
+                this.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+                this.dataset.original = '';
+            };
+
+            /* 修改悬停交互逻辑 */
+            const overlay = document.getElementById('previewOverlay');
+            let currentPreview = null;
+let currentIndex = -1;
+
+            // 创建悬浮窗图片
+            function createPreview(imgUrl) {
+              const img = new Image();
+              img.className = 'preview-image';
+              img.src = imgUrl;
+              img.onload = () => {
+                overlay.style.display = 'flex';
+                requestAnimationFrame(() => {
+                  overlay.style.opacity = 1;
+                  img.style.transform = 'scale(1)';
+                });
+              };
+              return img;
+            }
+
+            // 更新鼠标事件处理
+            card.addEventListener('mouseenter', (e) => {
+              if (img.dataset.original && (currentIndex !== channel.index || !currentPreview)) {
+                if (!e.relatedTarget || !e.relatedTarget.closest('.preview-overlay')) {
+                  currentIndex = channel.index;
+                  currentPreview = createPreview(img.dataset.original);
+                  overlay.innerHTML = '';
+                  overlay.appendChild(currentPreview);
+                }
+              }
+            });
+
+            card.addEventListener('mouseleave', () => {
+              if (currentPreview) {
+                overlay.style.opacity = 0;
+                setTimeout(() => {
+                  overlay.style.display = 'none';
+                  currentPreview = null;
+                }, 300);
+              }
+            });
+
+
+            // 悬停切换大图
+            let originalImg = '';
+
+            card.append(nameTag, img);
+            return card;
+        }
+
+        // 加载JSON数据
+        fetch('urls.json')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.querySelector('.grid-container');
+                data.forEach(channel => {
+                    container.appendChild(createCard(channel));
+                });
+            })
+            .catch(error => console.error('加载数据失败:', error));
+    </script>
+</body>
+</html>
