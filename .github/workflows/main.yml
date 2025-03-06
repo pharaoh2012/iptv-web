@@ -35,3 +35,5 @@ jobs:
         git add .
         git commit -am 'Auto-commit generated files' || true
         git push --force
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
