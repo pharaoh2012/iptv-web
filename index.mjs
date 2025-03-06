@@ -13,8 +13,8 @@ function execAsync(command) {
                 return;
             }
             if (stderr) {
-                console.error(`❌❌stderr: ${stderr}`);
-                resolve(false);
+                // console.error(`❌❌stderr: ${stderr}`);
+                resolve(true);
                 return;
             }
             console.log(`标准输出:\n${stdout}`);
@@ -55,9 +55,9 @@ async function main() {
         const item = urls[i];
         console.log(`🎞🎞[${i + 1}/${urls.length}] ${item.name} ${item.url}`);
         console.log(`ffmpeg -i "${item.url}" -vf "select='eq(pict_type,I)',setpts=PTS-STARTPTS" -vsync vfr -q:v 2 -frames:v 1 -y "docs/img/${item.index}.jpg"`);
-        let ok = await execAsync(`ffmpeg -i "${item.url}" -vf "select='eq(pict_type,I)',setpts=PTS-STARTPTS" -vsync vfr -q:v 2 -frames:v 1 -y "docs/img/${item.index}.jpg"`);
-        urls[i].ok = ok;
+        await execAsync(`ffmpeg -i "${item.url}" -vf "select='eq(pict_type,I)',setpts=PTS-STARTPTS" -vsync vfr -q:v 2 -frames:v 1 -y "docs/img/${item.index}.jpg"`);
         await execAsync(`ffmpeg -i "docs/img/${item.index}.jpg" -vf "scale=iw*0.2:ih*0.2" -y "docs/img/${item.index}_thumbnail.jpg"`);
+        urls[i].ok = fs.existsSync(`docs/img/${item.index}.jpg`)
     }
 
     fs.writeFileSync("./docs/urls.json", JSON.stringify(urls));

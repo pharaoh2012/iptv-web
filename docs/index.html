@@ -85,6 +85,18 @@
         transform: scale(0.95);
         transition: transform 0.3s ease;
       }
+
+      .size-info {
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-family: monospace;
+      }
     </style>
   </head>
   <body>
@@ -95,6 +107,7 @@
       function createCard(channel) {
         const card = document.createElement("div");
         card.className = "channel-card";
+        card.dataset.index = channel.index;
 
         const nameTag = document.createElement("div");
         nameTag.className = "channel-name";
@@ -111,6 +124,15 @@
           this.src =
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
           this.dataset.original = "";
+        };
+
+        img.onload = function () {
+          const sizeTag = document.createElement("div");
+          sizeTag.className = "size-info";
+          sizeTag.textContent = `${img.naturalWidth * 5} x ${
+            img.naturalHeight * 5
+          }`;
+          card.appendChild(sizeTag);
         };
 
         let currentPreview = null;
@@ -171,8 +193,6 @@
 
       /* 修改悬停交互逻辑 */
       const overlay = document.getElementById("previewOverlay");
-
-      console.info("create overlay");
 
       overlay.addEventListener("click", (e) => {
         console.info(e.target.tagName);
